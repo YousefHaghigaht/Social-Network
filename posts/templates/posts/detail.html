@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    {% if request.user.id == post.user.id %}
+        <a href="{% url 'posts:delete' post.id %}" class="btn btn-danger">Delete</a>
+        <a href="{% url 'posts:update' post.id %}" class="btn btn-info">Update</a><br><br><hr>
+    {% endif %}
+
+    <h3><a href="{% url 'accounts:profile' post.user.id %}" >{{ post.user.username }}</a></h3>
+    <small>{{ post.updated|date:"Y-M" }}</small>
+    <hr>
+    <p>{{ post.body }}</p>
+
+
+    {% if request.user.is_authenticated %}
+
+        <a href="{% url 'posts:like' post.id %}" class="{% if not can_like %}disabled{% endif %} btn btn-primary col-md-2">Like{{ post.like_count }}</a><br><br>
+
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form.as_table }}
+            <input type="submit" value="send">
+        </form>
+
+    <div class="card bg-dark">
+        
+        {% for comment in comments %}
+
+            <p class="card-header" style="color: white;"><b>{{ comment.user.username }}</b> - {{ comment.created|timesince }}</p>
+
+            <p class="card-body" style="color: white;">{{ comment.body }}</p>
+            
+
+            {% for reply in comment.rcomments.all %}
+
+
+                <p class="card-body" style="color: white;">{{ reply.user.username }} :  {{ reply.body }}</p>
+
+            {% endfor %}
+            
+            <form action="{% url 'posts:reply' comment.id post.id %}" method="post" style="color:white;">
+                {% csrf_token %}
+                {{ form.as_table }}
+                <input type="submit" value="send">
+            </form><hr>
+
+        {% endfor %}
+    {% endif %}
+
+   </div>
+
+{% endblock %}
